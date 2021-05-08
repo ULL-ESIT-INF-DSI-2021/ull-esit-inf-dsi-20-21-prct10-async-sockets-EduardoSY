@@ -1,0 +1,13 @@
+{
+  "entryPoints": [
+    "./src/pe103/mastercard.ts",
+    "./src/pe103/visa.ts",
+    "./src/pe103/paypal.ts",
+    "./src/pe103/pagoTarjeta_interfaz.ts",
+    "./src/pe103/pago.ts",
+    "./src/noteApp/note.ts",
+    "./src/noteApp/userNoteOptions.ts",
+    "./src/noteApp/noteApp.ts"
+  ],
+  "out": "./docs/docum"
+}
