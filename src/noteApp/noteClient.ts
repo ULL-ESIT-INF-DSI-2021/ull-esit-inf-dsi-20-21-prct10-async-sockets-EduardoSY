@@ -7,25 +7,30 @@
  */
 
 
-import {connect} from 'net';
+// import {connect} from 'net';
 // import {MessageEventEmitterClient} from './eventEmitterClient';
 import * as yargs from 'yargs';
 import * as chalk from 'chalk';
+import {RequestType} from './messageType';
+
+import {connect} from 'net';
+import {MessageEventEmitterClient} from './eventEmitterClient';
+
+
 const client = connect({port: 60300});
 const clientMSEC = new MessageEventEmitterClient(client);
 
-/**
-  * Recibe el evento message y, dependiendo del tipo que sea
-  * muestra un contenido y otro.
-  */
 clientMSEC.on('message', (message) => {
-  if (message.type === 'connected') {
-    console.log(`Connection established`);
+  if (message.type === 'watch') {
+    console.log(`Connection established: watching file ${message.file}`);
+  } else if (message.type === 'change') {
+    console.log('File has been modified.');
+    console.log(`Previous size: ${message.prevSize}`);
+    console.log(`Current size: ${message.currSize}`);
   } else {
     console.log(`Message type ${message.type} is not valid`);
   }
 });
-
 
 /** Interacción con el usuario por consola */
 
@@ -64,7 +69,17 @@ yargs.command({
   handler(argv) {
     if (typeof argv.user === 'string' && typeof argv.title === 'string' &&
     typeof argv.body === 'string' && typeof argv.color === 'string') {
+      const inputData: RequestType = {
+        type: 'add',
+        user: argv.user,
+        title: argv.title,
+        body: argv.body,
+        color: argv.color,
+      }
       // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
+      console.log('Opcion: Add note');
+
+      client.write(JSON.stringify(`${JSON.stringify(inputData)}\n`));
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -92,6 +107,7 @@ yargs.command({
   handler(argv) {
     if (typeof argv.user === 'string' && typeof argv.title === 'string') {
       // noteOpt.removeNote(argv.user, argv.title);
+      console.log('Opcion: Delete note');
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -130,6 +146,7 @@ yargs.command({
     if (typeof argv.user === 'string' && typeof argv.title === 'string' &&
     typeof argv.body === 'string' && typeof argv.color === 'string') {
       // noteOpt.modifyNote(argv.user, argv.title, argv.body, argv.color);
+      console.log('Opcion: Modify note');
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -156,12 +173,7 @@ yargs.command({
   },
   handler(argv) {
     if (typeof argv.user === 'string' && typeof argv.title === 'string') {
-      let nota = noteOpt.readNote(argv.user, argv.title);
-
-      if (nota instanceof Note) {
-        console.log(chalk.keyword(nota.getColor())(nota.getTitle()));
-        console.log(chalk.keyword(nota.getColor())(nota.getBody()));
-      }
+      console.log('Opcion: Read note');
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -183,11 +195,7 @@ yargs.command({
   },
   handler(argv) {
     if (typeof argv.user === 'string') {
-      const notas: Note[] = noteOpt.listNotes(argv.user);
-      console.log(chalk.bgGray.white('### Notas de ' + argv.user + ' ###'));
-      notas.forEach((nota) => {
-        console.log(chalk.keyword(nota.getColor())(nota.getTitle()));
-      });
+      console.log('Opcion: List notes');
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
