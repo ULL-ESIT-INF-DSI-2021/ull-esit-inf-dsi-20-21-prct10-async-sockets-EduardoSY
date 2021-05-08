@@ -8,5 +8,5 @@ export type RequestType = {
 
 export type ResponseType = {
   type: 'add' | 'remove' | 'modify' | 'read' | 'list';
-  status: 'ok' | 'fail';
+  status: boolean; // True means OK. False means FAIL.
 }

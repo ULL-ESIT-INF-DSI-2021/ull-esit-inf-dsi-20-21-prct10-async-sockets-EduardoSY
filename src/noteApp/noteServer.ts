@@ -1,6 +1,8 @@
 import * as net from 'net';
 import * as fs from 'fs';
 import {Note} from './note';
+import {ResponseType} from './messageType';
+
 
 import {UserNoteOptions} from './userNoteOptions';
 
@@ -35,20 +37,27 @@ net.createServer({allowHalfOpen: true}, (connection) => {
     console.log('DEBUG: Emit emitido y request recibido');
     switch (message.type) {
       case 'add':
-        noteOpt.addNote(message.user, message.title, message.body,
+        let status = noteOpt.addNote(message.user, message.title, message.body,
             message.color);
+        const responseData: ResponseType = {
+          type: 'add',
+          status: status,
+        };
+        connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            connection.end();
+          }
+        });
         break;
       case 'remove':
-
         break;
       case 'modify':
-
         break;
       case 'list':
-
         break;
       case 'read':
-
         break;
     }
   });
@@ -58,9 +67,9 @@ net.createServer({allowHalfOpen: true}, (connection) => {
   });
 
   connection.on('end', () => {
-    let info = JSON.parse(wholeData);
-    console.log('He recibido el texto de ' + info.user);
-    let chat = info.user + ': ' + info.text;
+    // let info = JSON.parse(wholeData);
+    // console.log('He recibido el texto de ' + info.user);
+    // let chat = info.user + ': ' + info.text;
     // fs.appendFile('registro.txt', chat + '\n', function(err) {
     //  if (err) return console.log(err);
     //  console.log('Chat saved');

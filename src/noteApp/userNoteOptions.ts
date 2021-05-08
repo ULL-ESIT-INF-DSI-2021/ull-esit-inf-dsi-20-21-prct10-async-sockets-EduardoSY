@@ -17,7 +17,8 @@ export class UserNoteOptions {
    * @param color Color de la nota
    */
   addNote(usuario: string, titulo: string, cuerpo: string,
-      color: string): void {
+      color: string): boolean {
+    let isOK: boolean = true;
     try {
       // Si el directorio del usuario no existe se crea
       if (fs.existsSync(`db/${usuario}`) == false) {
@@ -36,7 +37,9 @@ export class UserNoteOptions {
       }
     } catch (err) {
       console.log(chalk.red(err.message));
+      isOK = false;
     }
+    return isOK;
   }
 
   /**

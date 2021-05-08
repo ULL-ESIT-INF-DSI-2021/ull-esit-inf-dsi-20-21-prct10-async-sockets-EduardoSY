@@ -20,15 +20,17 @@ import {MessageEventEmitterClient} from './eventEmitterClient';
 const client = connect({port: 60300});
 const clientMSEC = new MessageEventEmitterClient(client);
 
+/*
+let wholeData = '';
+clientMSEC.on('data', (dataChunk) => {
+  wholeData += dataChunk;
+}); */
+
 clientMSEC.on('message', (message) => {
-  if (message.type === 'watch') {
-    console.log(`Connection established: watching file ${message.file}`);
-  } else if (message.type === 'change') {
-    console.log('File has been modified.');
-    console.log(`Previous size: ${message.prevSize}`);
-    console.log(`Current size: ${message.currSize}`);
-  } else {
-    console.log(`Message type ${message.type} is not valid`);
+  // const infoResponse = JSON.parse(wholeData);
+  console.log('FINALIZADO YU ESO');
+  if (message.type === 'add') {
+    console.log(`GRANDE PUERCOO`);
   }
 });
 
