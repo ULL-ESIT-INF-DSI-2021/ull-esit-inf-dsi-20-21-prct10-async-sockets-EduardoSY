@@ -47,7 +47,8 @@ export class UserNoteOptions {
    * @param usuario Usuario del que se eliminara la nota
    * @param titulo Titulo de la nota a eliminar
    */
-  removeNote(usuario: string, titulo: string): void {
+  removeNote(usuario: string, titulo: string): boolean {
+    let isOK: boolean = true;
     try {
       if (fs.existsSync(`db/${usuario}/${titulo}.json`) == true) {
         fs.rmSync(`db/${usuario}/${titulo}.json`);
@@ -58,7 +59,9 @@ export class UserNoteOptions {
       }
     } catch (err) {
       console.log(chalk.red(err.message));
+      isOK = false;
     }
+    return isOK;
   }
 
   /**
@@ -69,7 +72,7 @@ export class UserNoteOptions {
    * @param color Color modificado de la nota
    */
   modifyNote(usuario: string, titulo: string, cuerpo: string,
-      color: string): void {
+      color: string): boolean {
     try {
       if (fs.existsSync(`db/${usuario}/${titulo}.json`) == true) {
         const nota = new Note(titulo, cuerpo, color as colors);

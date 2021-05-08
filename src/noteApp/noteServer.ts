@@ -36,7 +36,7 @@ net.createServer({allowHalfOpen: true}, (connection) => {
   connection.on('request', (message) => {
     console.log('DEBUG: Emit emitido y request recibido');
     switch (message.type) {
-      case 'add':
+      case 'add': {
         let status = noteOpt.addNote(message.user, message.title, message.body,
             message.color);
         const responseData: ResponseType = {
@@ -50,10 +50,37 @@ net.createServer({allowHalfOpen: true}, (connection) => {
             connection.end();
           }
         });
+      }
         break;
-      case 'remove':
+      case 'remove': {
+        let status = noteOpt.removeNote(message.user, message.title);
+        const responseData: ResponseType = {
+          type: 'remove',
+          status: status,
+        };
+        connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            connection.end();
+          }
+        });
+      }
         break;
-      case 'modify':
+      case 'modify': {
+        let status = noteOpt.modifyNote(argv.user, argv.title, argv.body, argv.color);
+        const responseData: ResponseType = {
+          type: 'remove',
+          status: status,
+        };
+        connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            connection.end();
+          }
+        });
+      }
         break;
       case 'list':
         break;
