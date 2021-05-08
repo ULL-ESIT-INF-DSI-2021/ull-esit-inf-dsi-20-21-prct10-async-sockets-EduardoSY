@@ -79,7 +79,7 @@ yargs.command({
       // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
       console.log('Opcion: Add note');
 
-      client.write(JSON.stringify(`${JSON.stringify(inputData)}\n`));
+      client.write(`${JSON.stringify(inputData)}\n`);
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
