@@ -188,7 +188,73 @@ Si analizamos bien en la clase **MessageEventEmitterClient**, cuando emitimos el
 ### PARTE SERVIDOR
 
 Lo primero que hacemos cuando se realiza una conexión es indicar precisamente eso, que algún cliente se ha conectado con el servidor.
-Una vez hecho esto, al igual que se hizo con la clase **MessageEventEmitterClient**, se recogen los fragmentos de mensajes enviados por el cliente
+Una vez hecho esto, al igual que se hizo con la clase **MessageEventEmitterClient**, se recogen los fragmentos de mensajes enviados por el cliente.
+
+Una vez todos los ''trozos'' del mensaje están almacenados en **wholeData** se emite un evento **request** junto con la información recibida en formato JSON.
+
+```typescript
+  console.log(chalk.bgGreen.black('A client has connected.'));
+
+  let wholeData = '';
+  connection.on('data', (dataChunk) => {
+    wholeData += dataChunk;
+
+    let messageLimit = wholeData.indexOf("\n");
+    while (messageLimit !== -1) {
+      const message = wholeData.substring(0, messageLimit);
+      wholeData = wholeData.substring(messageLimit + 1);
+      connection.emit('request', JSON.parse(message));
+      messageLimit = wholeData.indexOf('\n');
+    }
+  });
+```
+
+A continuación atendemos el evento **Request**. Cuando se recibe este tipo de eventos lo primero que hacemos es mostrar qué tipo de petición ha sido. Esto es util tanto para conocer qué está procesando el servidor como para realizar debugging.
+
+Con un switch, gracias a la propiedad **type** que tenemos en el objeto JSON podemos distinguir qué se desea hacer con la petición. A continuación tenemos un fragmento del código (no se ha puedo todo para evitar que ocupe demasiado espacio). En ese ejemplo tenemos la funcion **add**.
+
+Si quieremos añadir una nota llamamos a la función `addNote` pasandole los parámetros recibidos en el objeto JSON de título, cuerpo y color. 
+
+Las funciones para interactuar con las notas han sido modificadas de tal manera que devuelvan un booleano indicando si la operación ha sido satisfactoria o no.
+
+Este valor lo guardamos en la variable **status**. Esta nos dirá si el comando se ha efectuado correctamente o no.
+A continuación creamos una constante de tipo **ResponseType**. Este tipo de dato, definido en `messageType.ts` nos presenta la estructura de dato que será enviada desde servidor al cliente como respuesta. Le indicamos el tipo de operación realizada (es el mismo tipo que el de la petición/request) y el resultado de la operación, que habíamos guardado en **status**.
+
+En caso de que la función devuelva una nota o un listado, tenemos también un atributo formado por un array de strings destinado para almacenarlos.
+
+Una vez hemos credo el tipo de dato debemos enviarlo al cliente haciendo uso de `write`. Al igual que se hizo para enviar la petición del cliente al servidor, la constante, que tiene formato JSON, debemos pasarla a string y añadirle además el **\n** para indicar que el mensaje está completo.
+
+Si al enviar la petición no ha habido ningún error cerramos la conexión del cliente con el servidor. Si el cliente quiere hacer una nueva petición deberá crear una nueva conexión.
+
+```typescript
+connection.on('request', (message) => {
+    // console.log('DEBUG: Emit emitido y request recibido');
+    console.log(chalk.bgWhite.black.bold('Peticion realizada >> ' +
+      message.type));
+    switch (message.type) {
+      case 'add': {
+        let status = noteOpt.addNote(message.user, message.title, message.body,
+            message.color);
+        const responseData: ResponseType = {
+          type: 'add',
+          status: status,
+        };
+        connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            connection.end();
+          }
+        });
+      }
+        break;
+      case 'remove': {
+        ...
+        ...
+        ...
+```
+
+
 
 ### Ejemplo de ejecución
 
