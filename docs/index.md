@@ -187,7 +187,8 @@ Si analizamos bien en la clase **MessageEventEmitterClient**, cuando emitimos el
 
 ### PARTE SERVIDOR
 
-lorem ipsum
+Lo primero que hacemos cuando se realiza una conexión es indicar precisamente eso, que algún cliente se ha conectado con el servidor.
+Una vez hecho esto, al igual que se hizo con la clase **MessageEventEmitterClient**, se recogen los fragmentos de mensajes enviados por el cliente
 
 ### Ejemplo de ejecución
 
