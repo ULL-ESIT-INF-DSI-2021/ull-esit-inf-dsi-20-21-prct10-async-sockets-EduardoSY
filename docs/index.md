@@ -34,12 +34,19 @@ npm install --save-dev yargs @types/yargs
 
 ## 3. Desarrollo de los ejercicios <a name="desarrollo"></a>
 
-- **[Enlace al código fuente]()**
+- **[Enlace al código fuente](https://github.com/ULL-ESIT-INF-DSI-2021/ull-esit-inf-dsi-20-21-prct10-async-sockets-EduardoSY/tree/master/src)**
 
-- **[Enlace a los tests]()**
+- **[Enlace a los tests](https://github.com/ULL-ESIT-INF-DSI-2021/ull-esit-inf-dsi-20-21-prct10-async-sockets-EduardoSY/tree/master/tests)**
 
-- **[Enlace a la documentación generada]()**
+- **[Enlace a la documentación generada](https://ull-esit-inf-dsi-2021.github.io/ull-esit-inf-dsi-20-21-prct10-async-sockets-EduardoSY/docum/index)**
 
+### PARTE CLIENTE
+
+lorem ipsum
+
+### PARTE SERVIDOR
+
+lorem ipsum
 
 ### Ejemplo de ejecución
 
