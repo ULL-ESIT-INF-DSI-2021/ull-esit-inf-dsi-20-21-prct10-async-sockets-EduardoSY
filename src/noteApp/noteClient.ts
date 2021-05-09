@@ -1,15 +1,39 @@
+// noteClient.ts
+/**
+ * Esta clase se encarga de dos cosas: Procesar la respuesta y enviar
+ * peticiones al servidor.
+ *
+ * Primero establecemos la conexión con:
+ * ```typescript
+ * const client = connect({port: 60300});
+ * ```
+ * Con YARGS definimos los posibles comandos que acepta nuestra aplicación.
+ * Una vez recibida la información lo que hacemos es enviar la petición al
+ * servidor con los datos.
+ *
+ * La respuesta la recibimos en *clientMSEC* y, una vez ha obtenido
+ * completamente el mensaje del servidor, emite un evento message que es captado
+ * y analizado. Dependiendo del contenido de este evento mostramos la
+ * información recibida.
+ * @module
+ */
+
 import * as yargs from 'yargs';
 import * as chalk from 'chalk';
 import {RequestType} from './messageType';
-import {Note} from './note';
-
 import {connect} from 'net';
 import {MessageEventEmitterClient} from './eventEmitterClient';
-import { argv } from 'yargs';
 
+/**
+ * Definicion de la conexión del cliente con el servidor
+ */
 const client = connect({port: 60300});
 const clientMSEC = new MessageEventEmitterClient(client);
 
+/**
+ * Manejo del evento message emitido por la clase
+ * MessageEventEmitterClient.
+ */
 clientMSEC.on('message', (message) => {
   switch (message.type) {
     case 'add':
@@ -46,7 +70,7 @@ clientMSEC.on('message', (message) => {
       break;
     case 'listar':
       if (message.status) {
-        console.log('## NOTAS ENCONTRADAS ##');
+        console.log(chalk.bgWhite.black('## NOTAS ENCONTRADAS ##'));
         let aux: string[] = message.notas;
         aux.forEach( (elemento) => {
           let notaObj = JSON.parse(elemento);
@@ -57,12 +81,10 @@ clientMSEC.on('message', (message) => {
   }
 });
 
-/** Interacción con el usuario por consola */
+// ====================================================
+// Interacción con el usuario por consola
+// ====================================================
 
-/* He intentado hacer que el usuario pueda introducir diversos mensajes
- una vez ha establecido la conexión pero no he sabido como hacerlo. Por lo 
- tanto, lo unico que se puede hacer es establecer la conexión indicanto un 
- usuario y un mensaje. */
 /**
  * Definicion del comando ADD
  */
@@ -101,9 +123,7 @@ yargs.command({
         body: argv.body,
         color: argv.color,
       };
-      // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
       console.log('Opcion: Add note');
-
       client.write(`${JSON.stringify(inputData)}\n`);
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
@@ -131,15 +151,13 @@ yargs.command({
   },
   handler(argv) {
     if (typeof argv.user === 'string' && typeof argv.title === 'string') {
-      // noteOpt.removeNote(argv.user, argv.title);
       const inputData: RequestType = {
         type: 'remove',
         user: argv.user,
         title: argv.title,
       };
-      // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
-      client.write(`${JSON.stringify(inputData)}\n`);
       console.log('Opcion: Delete note');
+      client.write(`${JSON.stringify(inputData)}\n`);
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -177,7 +195,6 @@ yargs.command({
   handler(argv) {
     if (typeof argv.user === 'string' && typeof argv.title === 'string' &&
     typeof argv.body === 'string' && typeof argv.color === 'string') {
-      // noteOpt.modifyNote(argv.user, argv.title, argv.body, argv.color);
       const inputData: RequestType = {
         type: 'modify',
         user: argv.user,
@@ -185,9 +202,8 @@ yargs.command({
         body: argv.body,
         color: argv.color,
       };
-      // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
-      client.write(`${JSON.stringify(inputData)}\n`);
       console.log('Opcion: Modify note');
+      client.write(`${JSON.stringify(inputData)}\n`);
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -219,9 +235,8 @@ yargs.command({
         user: argv.user,
         title: argv.title,
       };
-      // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
+      console.log('Opcion: Read note');
       client.write(`${JSON.stringify(inputData)}\n`);
-      console.log('Opcion: Read note' + inputData.title?.length);
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -247,8 +262,8 @@ yargs.command({
         type: 'list',
         user: argv.user,
       };
-      client.write(`${JSON.stringify(inputData)}\n`);
       console.log('Opcion: List note');
+      client.write(`${JSON.stringify(inputData)}\n`);
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }

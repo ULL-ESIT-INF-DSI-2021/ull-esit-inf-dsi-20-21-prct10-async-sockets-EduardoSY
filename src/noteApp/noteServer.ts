@@ -1,40 +1,45 @@
+// noteServer.ts
+/**
+ * Este fichero contiene la creación y manipulación de eventos por parte del
+ * servidor. Cuando se recibe una petición por parte del cliente, esta se
+ * tramita y se invoca al comando correspondiente de la aplicación de nota.
+ * Una vez completado este proceso, se devuelve una respuesta al cliente
+ * en base a los resultados obtenidos.
+ * @module
+ */
+
 import * as net from 'net';
-import * as fs from 'fs';
-import {Note} from './note';
 import {ResponseType} from './messageType';
-
-
 import {UserNoteOptions} from './userNoteOptions';
+import chalk = require('chalk');
 
 const noteOpt = new UserNoteOptions();
 
 /**
- * Creación del servidor
+ * Creació del servidor, donde se manejan tanto las conexiones como los
+ * eventos recibidos y emitidos.
  */
 net.createServer({allowHalfOpen: true}, (connection) => {
-  console.log('A client has connected.');
-  // connection.write(JSON.stringify({'type': 'connected'}) +
-  //    '\n');
+  console.log(chalk.bgGreen.black('A client has connected.'));
 
   let wholeData = '';
   connection.on('data', (dataChunk) => {
     wholeData += dataChunk;
 
     let messageLimit = wholeData.indexOf("\n");
-    console.log(wholeData);
-    // console.log('SOY MSGLIMIT ' + messageLimit);
+    // console.log(wholeData);
     while (messageLimit !== -1) {
       const message = wholeData.substring(0, messageLimit);
       wholeData = wholeData.substring(messageLimit + 1);
       connection.emit('request', JSON.parse(message));
       messageLimit = wholeData.indexOf('\n');
     }
-
-    // console.log(wholeData);
   });
 
   connection.on('request', (message) => {
-    console.log('DEBUG: Emit emitido y request recibido');
+    // console.log('DEBUG: Emit emitido y request recibido');
+    console.log(chalk.bgWhite.black.bold('Peticion realizada >> ' +
+      message.type));
     switch (message.type) {
       case 'add': {
         let status = noteOpt.addNote(message.user, message.title, message.body,
@@ -91,10 +96,8 @@ net.createServer({allowHalfOpen: true}, (connection) => {
         };
         if (typeof status === 'boolean') {
           responseData.status = false;
-          // console.log('FALLO');
         } else {
           responseData.notas = [status.noteToJSON()];
-         // console.log('SZ = ' + responseData.note);
         }
         connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
           if (err) {
@@ -106,7 +109,6 @@ net.createServer({allowHalfOpen: true}, (connection) => {
       }
         break;
       case 'list': {
-        console.log('HOLA');
         let out = noteOpt.listNotes(message.user);
         let out2: string[] = [];
         out.forEach( (element) => {
@@ -115,29 +117,18 @@ net.createServer({allowHalfOpen: true}, (connection) => {
         connection.write(`${JSON.stringify(({type: 'listar', status: true,
           notas: out2}))}\n`, (err) => {
           if (err) {
-
+            console.error(err);
           } else {
             connection.end();
           }
-          });
+        });
       }
         break;
     }
   });
 
   connection.on('close', () => {
-    console.log('Un cliente ha abandonado la sesión');
-  });
-
-  connection.on('end', () => {
-    // let info = JSON.parse(wholeData);
-    // console.log('He recibido el texto de ' + info.user);
-    // let chat = info.user + ': ' + info.text;
-    // fs.appendFile('registro.txt', chat + '\n', function(err) {
-    //  if (err) return console.log(err);
-    //  console.log('Chat saved');
-    // });
-    // connection.write()
+    console.log(chalk.bgGreen.black('Un cliente ha abandonado la sesión'));
   });
 }).listen(60300, () => {
   console.log('Waiting people');
