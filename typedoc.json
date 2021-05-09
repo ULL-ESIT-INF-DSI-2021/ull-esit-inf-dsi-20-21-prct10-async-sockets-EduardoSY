@@ -1,13 +1,12 @@
 {
   "entryPoints": [
-    "./src/pe103/mastercard.ts",
-    "./src/pe103/visa.ts",
-    "./src/pe103/paypal.ts",
-    "./src/pe103/pagoTarjeta_interfaz.ts",
-    "./src/pe103/pago.ts",
-    "./src/noteApp/note.ts",
-    "./src/noteApp/userNoteOptions.ts",
-    "./src/noteApp/noteApp.ts"
+    "./src/client/eventEmitterClient.ts",
+    "./src/client/noteClient.ts",
+    "./src/server/noteServer.ts",
+    "./src/server/noteApp/note.ts",
+    "./src/server/noteApp/noteApp.ts",
+    "./src/server/noteApp/userNoteOptions.ts",
+    "./src/messageType.ts"
   ],
   "out": "./docs/docum"
 }

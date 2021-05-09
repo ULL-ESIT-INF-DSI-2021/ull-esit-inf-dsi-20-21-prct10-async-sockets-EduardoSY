@@ -1,3 +1,6 @@
+/**
+ * Definicion del tipo de dato para las peticiones
+ */
 export type RequestType = {
   type: 'add' | 'remove' | 'modify' | 'read' | 'list';
   user: string;
@@ -6,6 +9,9 @@ export type RequestType = {
   color?: string;
 }
 
+/**
+ * Definicion del tipo de dato para las respuestas
+ */
 export type ResponseType = {
   type: 'add' | 'remove' | 'modify' | 'read' | 'listar';
   status: boolean; // True means OK. False means FAIL.
