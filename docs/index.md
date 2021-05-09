@@ -10,7 +10,7 @@
 
 ## 1. Introducción <a name="introduccion"></a>
 
-Esta décima práctica es una evolución de la práctica 8. En este caso vamos a coger la aplicación de notas y llevarla a un siguiente nivel haciendo uso de sockets. En este caso debemos hacer un planteamiento cliente-servidor donde, desde el lado del cliente, hacemos las peticiones (añadir nota, eliminar, etc) y estas son enviadas y procesadas por el servidor. El resultado de esta operación es devuelto y mostrado al cliente.
+Esta décima práctica es una evolución de la práctica 8. En este caso vamos a coger la aplicación de notas y llevarla a un siguiente nivel haciendo uso de sockets. En este caso debemos hacer un planteamiento cliente-servidor donde, desde el lado del cliente, hacemos las peticiones (añadir nota, eliminar, etc) y estas son enviadas y procesadas por el servidor. El resultado de esta operación es devuelto y mostrado al cliente. Esto es lo que se conoce como patrón **petición-respuesta**.
 
 Además de todo el código a desarrollar, también vamos a trabajar con Github Actions y la integración continua. Tendremos ejecución continua de código TS ejecutado en Node.js y configuracioń del flujo de trabajo para trabajar con Coveralls y SonarCloud.
 
@@ -42,11 +42,13 @@ npm install --save-dev yargs @types/yargs
 
 ### PARTE CLIENTE
 
-Lo primero que hacemos es establecer la conexión con el servidor. Para ello hacemos uso del comando 
+Lo primero que hacemos es establecer la conexión con el servidor por el puerto 60300. Para ello hacemos uso del comando 
 
 ```typescript
 const client = connect({port: 60300});
 ```
+
+Con esto se ha guardado el socket en la constante **client**.
 
 Con **yargs** definimos los comandos necesarios para cada una de las acciones. Estos comandos no han cambiado. La única diferencia respecto a la práctica anterior se encuentra en qué comandos ejecutan estos. Pongamos como ejemplo el comando **add**.
 
@@ -95,17 +97,21 @@ yargs.command({
 });
 ```
 
-Una vez definimos la estructura del comando, creamos una constante de tipo **RequestType**. Este tipo de dato, definido en `messageType.ts` nos presenta la estructura de dato que será enviada al servidor.
+Una vez definimos la estructura del comando, creamos una constante que implementa un objeto JSON definido en **RequestType**. Este tipo de dato, definido en `messageType.ts` nos presenta la estructura de dato que será enviada al servidor.
 
 `RequestType` tiene como parámetros obligatorios el tipo de petición que hacemos y sobre ué **usuario** se realiza. El resto de parámetros son opcionales (dependiendo de la consulta serán necesarios o no).
 
-Una vez definido esto enviamos al servidor la información con el comando `write`. Esta información no la podemos pasar tal cual la hemos definido. La debemos pasar de un objeto JSON a un string. Por tanto usamos la opción `stringify`. Además de esto, al final del string añadimos un **\n**. Este salto de línea será el indicador de que el mensaje ha acabado.
+Una vez definido esto enviamos al servidor la información con el comando `write`. Esta información no la podemos pasar tal cual la hemos definido. La debemos pasar de un objeto JSON a un string. Por tanto usamos la opción `stringify`. Además de esto, al final del string añadimos un **\n**. Este salto de línea será el indicador de que el mensaje ha acabado. Con esto estaríamos cumpliendo la parte de **petición** del patrón *peticioń-respuesta*.
+
+¿Por qué uso **\n** en lugar de, por ejemplo, el método `end` para indicar que ya he terminado de enviar la petición? Si hicieramos esto el servidor no podŕia mandarnos una respuesta de vuelta al cliente en dicho socket. Por lo tanto la opción de `end` se descarta.
 
 Una vez enviada la petición se debe esperar a que el **servidor la procese** y **devuelva una respuesta.**
 
 La respuesta obtenida por el servidor es manejada gracias una clase creada a partir de la clase **EventEmitter**. Esta clase es `MessageEventEmitterClient`, definida en el fichero `eventEmitterClient.ts`.
 
-Esta clase obtiene como parámetro la conexión que hemos establecido previamente. La funcionalidad de esta es recoger todos los trozos de mensaje que envie el servidor hasta que encontremos el **\n** que se nombró pocas lineas arriba. Una vez encontrado ese caracter de salto de línea **emitimos un evento** que, en este caso hemos denominado **message**. Este evento emitido será manejado posteriormente en el fichero `noteClient.ts`.
+Esta clase obtiene como parámetro la conexión que hemos establecido previamente. La funcionalidad de esta es recoger todos los trozos de mensaje que envie el servidor hasta que encontremos el **\n** que se nombró pocas lineas arriba. Esos trozos son los **dataChunk**, que se van agrupando en **wholeData**.
+
+Una vez encontrado ese caracter de salto de línea **emitimos un evento** que, en este caso hemos denominado **message**. Este evento emitido será manejado posteriormente en el fichero `noteClient.ts`.
 
 ```typescript
 export class MessageEventEmitterClient extends EventEmitter {
@@ -129,6 +135,8 @@ export class MessageEventEmitterClient extends EventEmitter {
 ```
 
 ¿Por qué es necesaria esta clase? Cuando el servidor envia un mensaje, lo más común es que este se envie completo y sin ningún problema. Sin embargo, supongamos que no es así. Que el mensaje se envía fraccionado o que ha habido un error momentaneo en la conexión. Gracias a este método podemos obtener todos los trozos y formar el mensaje completo.
+
+Otra opción es que podríamos haber implementado directamente el codigo de esta clase en el fichero, tal y como hemos hecho con el servidor.
 
 Ahora vemos cómo se analiza el evento **message**.
 
@@ -224,7 +232,7 @@ En caso de que la función devuelva una nota o un listado, tenemos también un a
 
 Una vez hemos credo el tipo de dato debemos enviarlo al cliente haciendo uso de `write`. Al igual que se hizo para enviar la petición del cliente al servidor, la constante, que tiene formato JSON, debemos pasarla a string y añadirle además el **\n** para indicar que el mensaje está completo.
 
-Si al enviar la petición no ha habido ningún error cerramos la conexión del cliente con el servidor. Si el cliente quiere hacer una nueva petición deberá crear una nueva conexión.
+Si al enviar la petición no ha habido ningún error cerramos la conexión del cliente con el servidor. Si el cliente quiere hacer una nueva petición deberá crear una nueva conexión. Con esto ya cumpliriamos la parte de respuesta del patrón *petición-respuesta*.
 
 ```typescript
 connection.on('request', (message) => {
@@ -260,18 +268,24 @@ connection.on('request', (message) => {
 
 ### Tests
 
-En esta práctica, al igual que las anteriores, se ha seguido una metodología TDD. Por tanto, hemos ido creando los tests y posteriormente el código que así resuelve.
+Para la realización de los test tenemos tres ficheros. `note.spec.ts` y `userNoteOptions.spec.ts` corresponden a los tests realizados para la práctica 8. Aquí se comprueba tanto la correcta creación y manipulación de notas a nivel individual como el correcto funcionamiento de las funciones implementadas.
 
-Este es **[el directorio con los tests del programa](https://github.com/ULL-ESIT-INF-DSI-2021/ull-esit-inf-dsi-20-21-prct08-filesystem-notes-app-EduardoSY/tree/master/tests/noteApp_test)**
+Estos tests han sufrido unos pequeños cambios debido a que, como se ha mencionado previamente, se ha modificado los valores de retorno de las funciones.
 
+El fichero `eventEmitterClient.spec.ts` es nuevo. En este se comprueba que la recepción de la inrformacion es correcta a pesar de fraccionarse el mensaje en distintos trozos y mandarse por separado.
+
+Este es **[el directorio con los tests del programa](https://github.com/ULL-ESIT-INF-DSI-2021/ull-esit-inf-dsi-20-21-prct10-async-sockets-EduardoSY/tree/master/tests)**
 
 ## 4. Dificultades y conclusión <a name="conclusion"></a>
 
+Es bantante satisfactorio ver como, a partir de trabajos anteriores, vamos mejorandolos y haciendo cosas cada vez más interesantes, como es el caso de separar la aplicación en servidor y cliente.
+
 A nivel general no han habido grandes complicaciones. Sin embargo, a la hora de realizar la implementación del comando 'list' en la parte del cliente, pasé un tiempo considerable para resolver una series de problemas con las llamadas de la función. Tras limpiar el código descubrí que un argumento que estaba pasando al console.log era el culpable de ello. De resto, la implementación ha sido bastante fluida.
 
-En cuanto al resultado final, es cierto que me gustaria haber podido hacerlo más robusto y óptimo en cuando 
+Aunque el código es funcional tal y como se indica en la práctica, soy consciente de que es bastante mejorable y optimizable.
 
 ## 5. Referencias <a name="referencias"></a>
+
 - [Guión práctica 10](https://ull-esit-inf-dsi-2021.github.io/prct10-async-sockets/): Guión de la práctica .
 - [Apuntes sobre Node.js](https://ull-esit-inf-dsi-2021.github.io/nodejs-theory/): Apuntes de la asignatura sobre Node.JS
 - [Apuntes sobre sockets](https://ull-esit-inf-dsi-2021.github.io/nodejs-theory/nodejs-sockets.html): Apuntes de la asignatura sobre Sockets
