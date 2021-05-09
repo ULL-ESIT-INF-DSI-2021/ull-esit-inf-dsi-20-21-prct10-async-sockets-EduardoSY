@@ -256,7 +256,7 @@ connection.on('request', (message) => {
 
 ### Ejemplo de ejecución
 
-![Ejemplo de ejecucion]()
+![Ejemplo de ejecucion](dsip10.PNG)
 
 ### Tests
 
