@@ -68,9 +68,10 @@ net.createServer({allowHalfOpen: true}, (connection) => {
       }
         break;
       case 'modify': {
-        let status = noteOpt.modifyNote(argv.user, argv.title, argv.body, argv.color);
+        let status = noteOpt.modifyNote(message.user, message.title,
+            message.body, message.color);
         const responseData: ResponseType = {
-          type: 'remove',
+          type: 'modify',
           status: status,
         };
         connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
@@ -82,9 +83,53 @@ net.createServer({allowHalfOpen: true}, (connection) => {
         });
       }
         break;
-      case 'list':
+      case 'list': {
+        let status = noteOpt.listNotes(message.user);
+        const responseData: ResponseType = {
+          type: 'list',
+          status: true,
+        };
+        if (typeof status === 'boolean') {
+          responseData.status = false;
+          // console.log('FALLO');
+        } else {
+          let info: string[] = [];
+          status.forEach(function(value) {
+            info.push(value.noteToJSON());
+          });
+          console.log('HAY ' + info.length + ' notas');
+          responseData.notas = [info[0]];
+        }
+        connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            connection.end();
+          }
+        });
+      }
         break;
-      case 'read':
+      case 'read': {
+        let status = noteOpt.readNote(message.user, message.title);
+        const responseData: ResponseType = {
+          type: 'read',
+          status: true,
+        };
+        if (typeof status === 'boolean') {
+          responseData.status = false;
+          // console.log('FALLO');
+        } else {
+          responseData.notas = [status.noteToJSON()];
+         // console.log('SZ = ' + responseData.note);
+        }
+        connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            connection.end();
+          }
+        });
+      }
         break;
     }
   });

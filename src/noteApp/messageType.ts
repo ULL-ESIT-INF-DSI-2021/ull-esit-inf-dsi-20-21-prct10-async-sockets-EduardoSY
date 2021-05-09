@@ -1,3 +1,4 @@
+import {Note} from './note';
 export type RequestType = {
   type: 'add' | 'remove' | 'modify' | 'read' | 'list';
   user: string;
@@ -9,4 +10,5 @@ export type RequestType = {
 export type ResponseType = {
   type: 'add' | 'remove' | 'modify' | 'read' | 'list';
   status: boolean; // True means OK. False means FAIL.
+  notas?: string[];
 }

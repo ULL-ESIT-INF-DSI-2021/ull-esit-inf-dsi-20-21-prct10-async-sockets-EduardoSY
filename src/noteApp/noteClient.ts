@@ -1,9 +1,11 @@
 import * as yargs from 'yargs';
 import * as chalk from 'chalk';
 import {RequestType} from './messageType';
+import {Note} from './note';
 
 import {connect} from 'net';
 import {MessageEventEmitterClient} from './eventEmitterClient';
+import { argv } from 'yargs';
 
 const client = connect({port: 60300});
 const clientMSEC = new MessageEventEmitterClient(client);
@@ -26,23 +28,31 @@ clientMSEC.on('message', (message) => {
       break;
     case 'modify':
       if (message.status) {
-        console.log(chalk.green('Nota añadida exitosamente'));
+        console.log(chalk.green('Nota modificada exitosamente'));
       } else {
-        console.log(chalk.red('La nota no pudo ser añadida'));
+        console.log(chalk.red('La nota no pudo ser modificada'));
       }
       break;
     case 'read':
       if (message.status) {
-        console.log(chalk.green('Nota añadida exitosamente'));
+        let nota = message.notas[0];
+        let notaObj = JSON.parse(nota);
+        console.log(chalk.keyword(notaObj.color)('>> TITULO -> ' +
+          notaObj.title));
+        console.log(chalk.keyword(notaObj.color)(notaObj.body));
       } else {
-        console.log(chalk.red('La nota no pudo ser añadida'));
+        console.log(chalk.red('La nota no pudo ser leida'));
       }
       break;
     case 'list':
       if (message.status) {
-        console.log(chalk.green('Nota añadida exitosamente'));
+        console.log('## NOTAS DE ' + argv.user + ' ##');
+        message.notas.forEach(function(value: string) {
+          let notaObj = JSON.parse(value);
+          console.log(chalk.keyword(notaObj.color)(notaObj.title));
+        });
       } else {
-        console.log(chalk.red('La nota no pudo ser añadida'));
+        console.log(chalk.red('La notas no ha podido listarse'));
       }
       break;
   }
@@ -169,6 +179,15 @@ yargs.command({
     if (typeof argv.user === 'string' && typeof argv.title === 'string' &&
     typeof argv.body === 'string' && typeof argv.color === 'string') {
       // noteOpt.modifyNote(argv.user, argv.title, argv.body, argv.color);
+      const inputData: RequestType = {
+        type: 'modify',
+        user: argv.user,
+        title: argv.title,
+        body: argv.body,
+        color: argv.color,
+      };
+      // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
+      client.write(`${JSON.stringify(inputData)}\n`);
       console.log('Opcion: Modify note');
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
@@ -196,7 +215,14 @@ yargs.command({
   },
   handler(argv) {
     if (typeof argv.user === 'string' && typeof argv.title === 'string') {
-      console.log('Opcion: Read note');
+      const inputData: RequestType = {
+        type: 'read',
+        user: argv.user,
+        title: argv.title,
+      };
+      // noteOpt.addNote(argv.user, argv.title, argv.body, argv.color);
+      client.write(`${JSON.stringify(inputData)}\n`);
+      console.log('Opcion: Read note' + inputData.title?.length);
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }
@@ -218,7 +244,12 @@ yargs.command({
   },
   handler(argv) {
     if (typeof argv.user === 'string') {
-      console.log('Opcion: List notes');
+      const inputData: RequestType = {
+        type: 'list',
+        user: argv.user,
+      };
+      client.write(`${JSON.stringify(inputData)}\n`);
+      console.log('Opcion: List note');
     } else {
       console.log(chalk.red('ERROR: Argumentos no validos'));
     }

@@ -73,6 +73,7 @@ export class UserNoteOptions {
    */
   modifyNote(usuario: string, titulo: string, cuerpo: string,
       color: string): boolean {
+    let isOK: boolean = true;
     try {
       if (fs.existsSync(`db/${usuario}/${titulo}.json`) == true) {
         const nota = new Note(titulo, cuerpo, color as colors);
@@ -84,7 +85,9 @@ export class UserNoteOptions {
       }
     } catch (err) {
       console.log(chalk.red(err.message));
+      isOK = false;
     }
+    return isOK;
   }
 
   /**
@@ -108,7 +111,8 @@ export class UserNoteOptions {
    * @param usuario Usuario del que se leera la nota
    * @param titulo Titulo de la nota a leer
    */
-  readNote(usuario: string, titulo: string): Note|void {
+  readNote(usuario: string, titulo: string): Note|boolean {
+    let isFail = false;
     try {
       if (fs.existsSync(`db/${usuario}/${titulo}.json`) == true) {
         const info = fs.readFileSync(`db/${usuario}/${titulo}.json`);
@@ -121,6 +125,8 @@ export class UserNoteOptions {
       }
     } catch (err) {
       console.log(chalk.red(err.message));
+      isFail = true;
     }
+    return isFail;
   }
 }
