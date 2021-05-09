@@ -103,6 +103,33 @@ Una vez definido esto enviamos al servidor la información con el comando `write
 
 Una vez enviada la petición se debe esperar a que el **servidor la procese** y **devuelva una respuesta.**
 
+La respuesta obtenida por el servidor es manejada gracias una clase creada a partir de la clase **EventEmitter**. Esta clase es `MessageEventEmitterClient`, definida en el fichero `eventEmitterClient.ts`.
+
+Esta clase obtiene como parámetro la conexión que hemos establecido previamente. La funcionalidad de esta es recoger todos los trozos de mensaje que envie el servidor hasta que encontremos el **\n** que se nombró pocas lineas arriba. Una vez encontrado ese caracter de salto de línea **emitimos un evento** que, en este caso hemos denominado **message**. Este evento emitido será manejado posteriormente en el fichero `noteClient.ts`.
+
+```typescript
+export class MessageEventEmitterClient extends EventEmitter {
+  constructor(connection: EventEmitter) {
+    super();
+
+    let wholeData = '';
+    connection.on('data', (dataChunk) => {
+      wholeData += dataChunk;
+
+      let messageLimit = wholeData.indexOf('\n');
+      while (messageLimit !== -1) {
+        const message = wholeData.substring(0, messageLimit);
+        wholeData = wholeData.substring(messageLimit + 1);
+        this.emit('message', JSON.parse(message));
+        messageLimit = wholeData.indexOf('\n');
+      }
+    });
+  }
+}
+```
+
+¿Por qué es necesaria esta clase? Cuando el servidor envia un mensaje, lo más común es que este se envie completo y sin ningún problema. Sin embargo, supongamos que no es así. Que el mensaje se envía fraccionado o que ha habido un error momentaneo en la conexión. Gracias a este método podemos obtener todos los trozos y formar el mensaje completo.
+
 
 ### PARTE SERVIDOR
 
