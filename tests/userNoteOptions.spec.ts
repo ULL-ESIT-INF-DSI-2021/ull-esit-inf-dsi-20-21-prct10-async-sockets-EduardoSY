@@ -1,7 +1,7 @@
 import 'mocha';
 import {expect} from 'chai';
-import {Note} from '../../src/noteApp/note';
-import {UserNoteOptions} from '../../src/noteApp/userNoteOptions';
+import {Note} from '../src/server/noteApp/note';
+import {UserNoteOptions} from '../src/server/noteApp/userNoteOptions';
 import * as fs from 'fs';
 
 describe('Test userNoteOptions', () => {

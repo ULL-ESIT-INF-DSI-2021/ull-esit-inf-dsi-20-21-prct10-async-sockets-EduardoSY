@@ -1,7 +1,7 @@
 import 'mocha';
 import {expect} from 'chai';
 import {EventEmitter} from 'events';
-import {MessageEventEmitterClient} from '../../src/noteApp/eventEmitterClient';
+import {MessageEventEmitterClient} from '../src/client/eventEmitterClient';
 
 describe('MessageEventEmitterClient', () => {
   it('Una vez se tenga el mensaje completo se debe emitir un evento message',
