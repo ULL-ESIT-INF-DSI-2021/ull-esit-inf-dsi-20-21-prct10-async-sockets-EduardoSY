@@ -42,7 +42,58 @@ npm install --save-dev yargs @types/yargs
 
 ### PARTE CLIENTE
 
-lorem ipsum
+Lo primero que hacemos es establecer la conexión con el servidor. Para ello hacemos uso del comando 
+
+```typescript
+const client = connect({port: 60300});
+```
+
+Con **yargs** definimos los comandos necesarios para cada una de las acciones. Estos comandos no han cambiado. La única diferencia respecto a la práctica anterior se encuentra en qué comandos ejecutan estos. Pongamos como ejemplo el comando **add**.
+
+```typescript
+yargs.command({
+  command: 'add',
+  describe: 'Add a new note',
+  builder: {
+    user: {
+      describe: 'User name',
+      demandOption: true,
+      type: 'string',
+    },
+    title: {
+      describe: 'Note title',
+      demandOption: true,
+      type: 'string',
+    },
+    body: {
+      describe: 'Note body',
+      demandOption: true,
+      type: 'string',
+    },
+    color: {
+      describe: 'Note color',
+      demandOption: true,
+      type: 'string',
+    },
+  },
+  handler(argv) {
+    if (typeof argv.user === 'string' && typeof argv.title === 'string' &&
+    typeof argv.body === 'string' && typeof argv.color === 'string') {
+      const inputData: RequestType = {
+        type: 'add',
+        user: argv.user,
+        title: argv.title,
+        body: argv.body,
+        color: argv.color,
+      };
+      console.log('Opcion: Add note');
+      client.write(`${JSON.stringify(inputData)}\n`);
+    } else {
+      console.log(chalk.red('ERROR: Argumentos no validos'));
+    }
+  },
+});
+```
 
 ### PARTE SERVIDOR
 
