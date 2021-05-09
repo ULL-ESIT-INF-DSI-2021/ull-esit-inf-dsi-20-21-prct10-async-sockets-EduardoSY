@@ -102,7 +102,7 @@ Una vez definimos la estructura del comando, creamos una constante que implement
 
 `RequestType` tiene como parámetros obligatorios el tipo de petición que hacemos y sobre ué **usuario** se realiza. El resto de parámetros son opcionales (dependiendo de la consulta serán necesarios o no).
 
-Una vez definido esto enviamos al servidor la información con el comando `write`. Esta información no la podemos pasar tal cual la hemos definido. La debemos pasar de un objeto JSON a un string. Por tanto usamos la opción `stringify`. Además de esto, al final del string añadimos un **\n**. Este salto de línea será el indicador de que el mensaje ha acabado. Con esto estaríamos cumpliendo la parte de **petición** del patrón *peticioń-respuesta*.
+Una vez definido esto enviamos al servidor la información con el comando `write`. Esta información no la podemos pasar tal cual la hemos definido. La debemos pasar de un objeto JSON a un string. Por tanto usamos la opción `stringify`. Además de esto, al final del string añadimos un **\n**. Este salto de línea será el indicador de que el mensaje ha acabado. Con esto estaríamos cumpliendo la parte de petición del patrón *peticioń-respuesta*.
 
 ¿Por qué uso **\n** en lugar de, por ejemplo, el método `end` para indicar que ya he terminado de enviar la petición? Si hicieramos esto el servidor no podŕia mandarnos una respuesta de vuelta al cliente en dicho socket. Por lo tanto la opción de `end` se descarta.
 
