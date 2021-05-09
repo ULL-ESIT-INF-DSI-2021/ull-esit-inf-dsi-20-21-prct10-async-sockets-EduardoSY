@@ -9,8 +9,8 @@
  */
 
 import * as net from 'net';
-import {ResponseType} from './messageType';
-import {UserNoteOptions} from './userNoteOptions';
+import {ResponseType} from '../messageType';
+import {UserNoteOptions} from './noteApp/userNoteOptions';
 import chalk = require('chalk');
 
 const noteOpt = new UserNoteOptions();

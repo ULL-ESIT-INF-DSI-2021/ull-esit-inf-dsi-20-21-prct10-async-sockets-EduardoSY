@@ -20,7 +20,7 @@
 
 import * as yargs from 'yargs';
 import * as chalk from 'chalk';
-import {RequestType} from './messageType';
+import {RequestType} from '../messageType';
 import {connect} from 'net';
 import {MessageEventEmitterClient} from './eventEmitterClient';
 

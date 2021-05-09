@@ -1,4 +1,3 @@
-import {Note} from './note';
 export type RequestType = {
   type: 'add' | 'remove' | 'modify' | 'read' | 'list';
   user: string;
