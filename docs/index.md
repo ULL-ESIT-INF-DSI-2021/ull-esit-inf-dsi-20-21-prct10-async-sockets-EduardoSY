@@ -130,6 +130,60 @@ export class MessageEventEmitterClient extends EventEmitter {
 
 ¿Por qué es necesaria esta clase? Cuando el servidor envia un mensaje, lo más común es que este se envie completo y sin ningún problema. Sin embargo, supongamos que no es así. Que el mensaje se envía fraccionado o que ha habido un error momentaneo en la conexión. Gracias a este método podemos obtener todos los trozos y formar el mensaje completo.
 
+Ahora vemos cómo se analiza el evento **message**.
+
+```typescript
+const clientMSEC = new MessageEventEmitterClient(client);
+
+clientMSEC.on('message', (message) => {
+  switch (message.type) {
+    case 'add':
+      if (message.status) {
+        console.log(chalk.green('Nota añadida exitosamente'));
+      } else {
+        console.log(chalk.red('La nota no pudo ser añadida'));
+      }
+      break;
+    case 'remove':
+      if (message.status) {
+        console.log(chalk.green('Nota eliminada exitosamente'));
+      } else {
+        console.log(chalk.red('La nota no pudo ser eliminada'));
+      }
+      break;
+    case 'modify':
+      if (message.status) {
+        console.log(chalk.green('Nota modificada exitosamente'));
+      } else {
+        console.log(chalk.red('La nota no pudo ser modificada'));
+      }
+      break;
+    case 'read':
+      if (message.status) {
+        let nota = message.notas[0];
+        let notaObj = JSON.parse(nota);
+        console.log(chalk.keyword(notaObj.color)('>> TITULO -> ' +
+          notaObj.title));
+        console.log(chalk.keyword(notaObj.color)(notaObj.body));
+      } else {
+        console.log(chalk.red('La nota no pudo ser leida'));
+      }
+      break;
+    case 'listar':
+      if (message.status) {
+        console.log(chalk.bgWhite.black('## NOTAS ENCONTRADAS ##'));
+        let aux: string[] = message.notas;
+        aux.forEach( (elemento) => {
+          let notaObj = JSON.parse(elemento);
+          console.log(chalk.keyword(notaObj.color)(notaObj.title));
+        });
+      }
+      break;
+  }
+});
+```
+
+Si analizamos bien en la clase **MessageEventEmitterClient**, cuando emitimos el evento, además emitimos la información recibida transformada a formato JSON válido. Entonces, al manejar el evento **message** hacemos uso de las propiedades de este. Con un **switch-case** diferenciamos el tipo de respuesta en base al atributo **type**. Dependiendo de cuaĺ sea se muestra un mensaje o determinada información.
 
 ### PARTE SERVIDOR
 
