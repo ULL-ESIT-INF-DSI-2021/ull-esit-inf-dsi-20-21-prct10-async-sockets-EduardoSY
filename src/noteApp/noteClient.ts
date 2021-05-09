@@ -44,15 +44,14 @@ clientMSEC.on('message', (message) => {
         console.log(chalk.red('La nota no pudo ser leida'));
       }
       break;
-    case 'list':
+    case 'listar':
       if (message.status) {
-        console.log('## NOTAS DE ' + argv.user + ' ##');
-        message.notas.forEach(function(value: string) {
-          let notaObj = JSON.parse(value);
+        console.log('## NOTAS ENCONTRADAS ##');
+        let aux: string[] = message.notas;
+        aux.forEach( (elemento) => {
+          let notaObj = JSON.parse(elemento);
           console.log(chalk.keyword(notaObj.color)(notaObj.title));
         });
-      } else {
-        console.log(chalk.red('La notas no ha podido listarse'));
       }
       break;
   }

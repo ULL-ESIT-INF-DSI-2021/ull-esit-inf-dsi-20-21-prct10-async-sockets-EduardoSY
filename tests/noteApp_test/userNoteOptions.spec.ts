@@ -14,7 +14,7 @@ describe('Test userNoteOptions', () => {
   it('Si la nota ya existe, al intentar crearla devuelve un error', () => {
     expect(userOpt.addNote('Test', 'Nota_test',
         'Esta es una nota de prueba',
-        'green')).to.be.undefined;
+        'green')).to.be.false;
   });
 
   it('Se puede modificar una nota', () => {
@@ -54,15 +54,15 @@ describe('Test userNoteOptions', () => {
 
   it('Si la nota no existe, al intentar modificarla devuelve un error', () => {
     expect(userOpt.modifyNote('Test', 'Nota_test',
-        'Esta es una nota de prueba modificada', 'blue')).to.be.undefined;
+        'Esta es una nota de prueba modificada', 'blue')).to.be.false;
   });
 
   it('Si la nota no existe, al intentar leerla devuelve un error', () => {
-    expect(userOpt.readNote('Test', 'Nota_test')).to.be.undefined;
+    expect(userOpt.readNote('Test', 'Nota_test')).to.be.true;
   });
 
   it('Si la nota no existe, al intentar borrarla devuelve un error', () => {
-    expect(userOpt.removeNote('Test', 'Nota_test2')).to.be.undefined;
+    expect(userOpt.removeNote('Test', 'Nota_test2')).to.be.false;
   });
 });
 

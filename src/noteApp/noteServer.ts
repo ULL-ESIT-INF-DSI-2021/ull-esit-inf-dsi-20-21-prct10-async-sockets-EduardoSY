@@ -83,32 +83,6 @@ net.createServer({allowHalfOpen: true}, (connection) => {
         });
       }
         break;
-      case 'list': {
-        let status = noteOpt.listNotes(message.user);
-        const responseData: ResponseType = {
-          type: 'list',
-          status: true,
-        };
-        if (typeof status === 'boolean') {
-          responseData.status = false;
-          // console.log('FALLO');
-        } else {
-          let info: string[] = [];
-          status.forEach(function(value) {
-            info.push(value.noteToJSON());
-          });
-          console.log('HAY ' + info.length + ' notas');
-          responseData.notas = [info[0]];
-        }
-        connection.write(`${JSON.stringify(responseData)}\n`, (err) => {
-          if (err) {
-            console.error(err);
-          } else {
-            connection.end();
-          }
-        });
-      }
-        break;
       case 'read': {
         let status = noteOpt.readNote(message.user, message.title);
         const responseData: ResponseType = {
@@ -129,6 +103,23 @@ net.createServer({allowHalfOpen: true}, (connection) => {
             connection.end();
           }
         });
+      }
+        break;
+      case 'list': {
+        console.log('HOLA');
+        let out = noteOpt.listNotes(message.user);
+        let out2: string[] = [];
+        out.forEach( (element) => {
+          out2.push(element.noteToJSON());
+        });
+        connection.write(`${JSON.stringify(({type: 'listar', status: true,
+          notas: out2}))}\n`, (err) => {
+          if (err) {
+
+          } else {
+            connection.end();
+          }
+          });
       }
         break;
     }
