@@ -95,6 +95,15 @@ yargs.command({
 });
 ```
 
+Una vez definimos la estructura del comando, creamos una constante de tipo **RequestType**. Este tipo de dato, definido en `messageType.ts` nos presenta la estructura de dato que será enviada al servidor.
+
+`RequestType` tiene como parámetros obligatorios el tipo de petición que hacemos y sobre ué **usuario** se realiza. El resto de parámetros son opcionales (dependiendo de la consulta serán necesarios o no).
+
+Una vez definido esto enviamos al servidor la información con el comando `write`. Esta información no la podemos pasar tal cual la hemos definido. La debemos pasar de un objeto JSON a un string. Por tanto usamos la opción `stringify`. Además de esto, al final del string añadimos un **\n**. Este salto de línea será el indicador de que el mensaje ha acabado.
+
+Una vez enviada la petición se debe esperar a que el **servidor la procese** y **devuelva una respuesta.**
+
+
 ### PARTE SERVIDOR
 
 lorem ipsum
